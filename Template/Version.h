@@ -9,10 +9,10 @@
 #define PLUGIN_INTRODUCTION         "Rewrite original Eban to cpp"
 #define PLUGIN_AUTHOR               "prorok"
 #define PLUGIN_VERSION_MAJOR        1
-#define PLUGIN_VERSION_MINOR        0
+#define PLUGIN_VERSION_MINOR        1
 #define PLUGIN_VERSION_REVISION     0
-#define PLUGIN_VERSION_BUILD        0
-#define PLUGIN_VERSION_STATUS       PLUGIN_VERSION_RELEASE
+#define PLUGIN_VERSION_BUILD        2
+#define PLUGIN_VERSION_STATUS       0
 
 //#define TARGET_BDS_PROTOCOL_VERSION 503
 // used by github actions(TODO)
