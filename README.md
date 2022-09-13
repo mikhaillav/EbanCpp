@@ -7,13 +7,13 @@
 
 ## Commands
 ### ban 
-##### Used to ban player that online (collect more info about player, like UUID, ClinetID, etc)
+##### Used to ban player that online (collect info about player like UUID, ClinetID, etc)
 ##### Syntax: ban〈player〉[reason]
 - player: nick name of player to ban (select online player via selectors) 
 - reason: reason of ban, will show then banned player join server. if doesn't say will be "Banned by admin" [optional]
 -----
 ### offban 
-##### Used to ban player that offline (collect just name)
+##### Used to ban player that offline (collect info about player like UUID, ClinetID, etc)
 ##### Syntax: offban〈player〉[reason]
 - player: nick name of player to ban  
 - reason: reason of ban, will show then banned player join server. if doesn't say will be "Banned by admin" [optional]
