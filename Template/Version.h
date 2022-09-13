@@ -9,7 +9,7 @@
 #define PLUGIN_INTRODUCTION         "Rewrite original Eban to cpp"
 #define PLUGIN_AUTHOR               "prorok"
 #define PLUGIN_VERSION_MAJOR        1
-#define PLUGIN_VERSION_MINOR        1
+#define PLUGIN_VERSION_MINOR        3
 #define PLUGIN_VERSION_REVISION     0
 #define PLUGIN_VERSION_BUILD        2
 #define PLUGIN_VERSION_STATUS       0

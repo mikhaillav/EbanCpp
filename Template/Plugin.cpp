@@ -13,15 +13,64 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
-
-inline bool isBanList(const std::string& name) {
-    struct stat buffer;
-    return (stat(name.c_str(), &buffer) == 0);
-}
+#include <regex>
 
 using json = nlohmann::json;
 
 Logger logger(PLUGIN_NAME);
+
+inline bool IsFile(const std::string& name) {
+    struct stat buffer;
+    return (stat(name.c_str(), &buffer) == 0);
+}
+
+auto j2 = R"(
+                {
+                    "kickmsg": "You have been banned\nReason: <reason>\n:(",
+                    "cmdmsg": "Banned player <player> try to join server.",
+                    "checkBanlist.succses": "Banlist found, all okay!",
+                    "checkBanlist.error": "Banlist not found, creating one...",
+                    "checkBanlist.create": "Created!",
+                    "checkConfig.succses": "Config found, all okay!",
+                    "default.reason": "Banned by admin",
+                    "banned.succses": "Player has been banned.",
+                    "banned.error.op": "Unable to Ban operator.",
+                    "banned.error.already": "Player is already banned.",
+                    "unbanned.succses": "Player has been unbanned.",
+                    "ban.ip": "false",
+                    "ban.clientid": "true",
+                    "ban.UUID": "true",
+                    "ban.XUID": "true",
+                    "ban.nickname": "true",
+                    "unbanned.error.isnt": "Player isn't banned."
+                }
+            )"_json;
+
+void checkfiles() {
+    if (!IsFile("EbanConfig.json")) {
+        logger.warn("Config not found, creating one...");
+        std::ofstream file("EbanConfig.json");
+
+        file << std::setw(4) << j2 << std::endl;
+        logger.warn("Created!");
+    }
+    if (!IsFile("banlist.json")) {
+        logger.warn("Banlist not found, creating one...");
+        std::ofstream file("banlist.json");
+        file << "[]";
+        logger.warn("Created!");
+    }
+}
+
+
+
+string checkcfg(const string item) {
+    std::ifstream banlist("EbanConfig.json"); //open config 
+    json parsed;
+    banlist >> parsed; //parsed config
+    string cpp_string = parsed[item].get<std::string>();
+    return cpp_string;
+}
 
 //Ban command code
 
@@ -34,14 +83,8 @@ class BanCmd : public Command
 public:
     void execute(CommandOrigin const& ori, CommandOutput& outp) const
     {
-        if (!isBanList("banlist.json")) {
-            logger.warn("Banlist not found, creating one...");
-            std::ofstream file("banlist.json");
-            file << "[]";
-            logger.warn("Created!");
-        }
-
-        string reasn = reason_isSet ? reason : "Banned by admin"; //defult reason
+        checkfiles();
+        string reasn = reason_isSet ? reason : checkcfg("default.reason"); //defult reason
 
         auto res = p.results(ori); //get target
 
@@ -52,8 +95,10 @@ public:
         {
 
             if(!i->isOP()){ //check is target OP
+                string msg = checkcfg("kickmsg");
+                msg = std::regex_replace(msg, std::regex(R"(<reason>)"), reasn);
 
-                i->kick("You have been banned \nReason: " + reasn + "\n:("); //kick target
+                i->kick(msg); //kick target
 
                 std::ifstream banlist("banlist.json"); //open banlist 
                 json parsed;
@@ -64,14 +109,17 @@ public:
                 std::transform(nick.begin(), nick.end(), nick.begin(),
                     [](unsigned char c) { return std::tolower(c); }); //transform nick to lowercase
 
-                json form = { {"Nick", nick}, {"UUID", i->getUuid()}, {"ClientID", i->getClientId()}, {"XUID", i->getXuid()}, {"Reason", reasn} }; //form for ban player
+                string ip = i->getIP();
+                ip = ip.substr(0, ip.find(":"));
+
+                json form = { {"Nick", nick}, {"UUID", i->getUuid()}, {"ClientID", i->getClientId()}, {"XUID", i->getXuid()}, {"Ip", ip}, {"Reason", reasn}}; //form for ban player
                 parsed.push_back(form); //add form to main json
                 nw << std::setw(4) << parsed << std::endl; //write new json to banlist
 
-                outp.success("Player has been banned.");
+                outp.success(checkcfg("banned.succses"));
             }
             else {
-                outp.error("Unable to Ban operator.");
+                outp.error(checkcfg("banned.error.op"));
             }
      
         }
@@ -104,16 +152,9 @@ class  OfflineBanCmd : public Command
 public:
     void execute(CommandOrigin const& ori, CommandOutput& outp) const
     {
-        //check is banlist exist
+        checkfiles();
 
-        if (!isBanList("banlist.json")) {
-            logger.warn("Banlist not found, creating one...");
-            std::ofstream file("banlist.json");
-            file << "[]";
-            logger.warn("Created!");
-        }
-
-        string reasn = reason_isSet ? reason : "Banned by admin";
+        string reasn = reason_isSet ? reason : checkcfg("default.reason");
 
         //tranform target to lowercase
 
@@ -132,7 +173,7 @@ public:
         bool notbanned = true;
         for (int i = 0; i < parsed.size(); i++) {
             if (parsed[i]["Nick"] == p) {
-                outp.error("Player is already banned.");
+                outp.error(checkcfg("banned.error.already"));
                 notbanned = false;
                 break;
             }
@@ -141,11 +182,11 @@ public:
         if (notbanned) {
             std::ofstream nw("banlist.json");
 
-            json form = { {"Nick",p}, {"UUID", "404 not found"}, {"ClientID", "404 not found"}, {"XUID", "404 not found"}, {"Reason", reasn} };
+            json form = { {"Nick",p}, {"UUID", "404 not found"}, {"ClientID", "404 not found"}, {"XUID", "404 not found"}, {"Ip", "404 not found"}, {"Reason", reasn} };
             parsed.push_back(form);
             nw << std::setw(4) << parsed << std::endl;
 
-            outp.success("Player has been banned.");
+            outp.success(checkcfg("banned.succses"));
         }
 
     }
@@ -174,14 +215,7 @@ class unBanCmd : public Command
 public:
     void execute(CommandOrigin const& ori, CommandOutput& outp) const
     {
-        //check is banlist exist
-
-        if (!isBanList("banlist.json")) {
-            logger.warn("Banlist not found, creating one...");
-            std::ofstream file("banlist.json");
-            file << "[]";
-            logger.warn("Created!");
-        }
+        checkfiles();
 
         //tranform target to lowercase
 
@@ -203,7 +237,7 @@ public:
                 std::ofstream nw("banlist.json");
                 parsed.erase(i);
                 nw << std::setw(4) << parsed << std::endl;
-                outp.success("Player has been unbanned.");
+                outp.success(checkcfg("unbanned.succses"));
                 banned = true;
                 break;
                 
@@ -211,7 +245,7 @@ public:
         }
         //else - give error
         if (!banned) {
-            outp.error("Player isn't banned.");
+            outp.error(checkcfg("unbanned.error.isnt"));
 
         }
     }
@@ -234,14 +268,7 @@ public:
 void JoinEvent(){
     Event::PlayerJoinEvent::subscribe([](const Event::PlayerJoinEvent& ev) {
 
-        //check is banlist exist
-
-        if (!isBanList("banlist.json")) {
-            logger.warn("Banlist not found, creating one...");
-            std::ofstream file("banlist.json");
-            file << "[]";
-            logger.warn("Created!");
-        }
+        checkfiles();
 
         Player* pl = ev.mPlayer;
 
@@ -251,13 +278,34 @@ void JoinEvent(){
         json parsed;
         banlist >> parsed;
         
+        
+
         // if player join is cheater - kick him
 
         for (int i = 0; i < parsed.size(); i++) {
-            if (parsed[i]["Nick"] == pl->getRealName() || parsed[i]["ClientID"] == pl->getClientId() || parsed[i]["XUID"] == pl->getXuid() || parsed[i]["UUID"] == pl->getUuid()) {
-                logger.warn("Banned player " + pl->getRealName() + " try to join server.");
+            string nick = pl->getRealName();
+            std::transform(nick.begin(), nick.end(), nick.begin(),
+                [](unsigned char c) { return std::tolower(c); }); //transform nick to lowercase
+
+            string ip = pl->getIP();
+            ip = ip.substr(0, ip.find(":"));
+
+            if ((parsed[i]["Ip"] == ip && checkcfg("ban.ip") == "true") || (parsed[i]["Nick"] == nick && checkcfg("ban.nickname") == "true") || (parsed[i]["ClientID"] == pl->getClientId() && checkcfg("ban.clientid") == "true") || (parsed[i]["XUID"] == pl->getXuid() && checkcfg("ban.XUID") == "true") || (parsed[i]["UUID"] == pl->getUuid() && checkcfg("ban.UUID") == "true")) {
+                if (parsed[i]["Ip"] == "404 not found") {
+                    Level::runcmdEx(R"(unban ")" + pl->getRealName() + R"(")");
+                    Level::runcmdEx(R"(ban ")" + pl->getRealName() + R"(" )" + parsed[i]["Reason"].dump());
+                }
+                else {
+                    string msg = checkcfg("cmdmsg");
+                    msg = std::regex_replace(msg, std::regex(R"(<player>)"), pl->getRealName());
+                    logger.warn(msg);
+
+                    string kick = checkcfg("kickmsg");
+                    kick = std::regex_replace(kick, std::regex(R"(<reason>)"), parsed[i]["Reason"].get<std::string>());
+                    pl->kick(kick);
+                }
                 
-                pl->kick("You have been banned \nReason: " + parsed[i]["Reason"].dump() + "\n:(");
+
             }
         }
 
@@ -277,15 +325,7 @@ void CommandEvent() {
 
 void PluginInit()
 {
-    if (!isBanList("banlist.json")) {
-        logger.warn("Banlist not found, creating one...");
-        std::ofstream file("banlist.json");
-        file << "[]";
-        logger.warn("Created!");
-    }
-    else {
-        logger.info("Banlist found, all okay!");
-    }
+    checkfiles();
     JoinEvent();
     CommandEvent();
 }
