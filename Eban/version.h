@@ -10,38 +10,37 @@
 #define PLUGIN_VERSION_BETA 1
 #define PLUGIN_VERSION_RELEASE 2
 
-// ***************************************************************************************
+ // ***************************************************************************************
 
-// Please FILL UP the content here before developing your plugin, and DO NOT modify any code
-// outside this area.
+ // Please FILL UP the content here before developing your plugin, and DO NOT modify any code
+ // outside this area.
 
-static_assert(false, "Please modify your plugin information below and delete this line!");
 
 // The basic descriptions of your plugin
 // Note that the the plugin name CAN ONLY CONTAIN Enlish alphabet, digit, dash(-) and
 // underscore(_). 
-#define PLUGIN_NAME "HelloWorldPrinter"
+#define PLUGIN_NAME "EbanCpp"
 // Describe what your plugin does
 // We recommend you start the introduction with a third-person singular verb.
-#define PLUGIN_INTRODUCTION "Prints \"Hello, World!\" in the console."
-#define PLUGIN_AUTHOR "Me"
+#define PLUGIN_INTRODUCTION "Rewrite original Eban to cpp"
+#define PLUGIN_AUTHOR "prorok"
 
 // The version of your plugin. If you do not know how to set it, please refer
 // to https://semver.org/ .
-#define PLUGIN_VERSION_MAJOR 0
-#define PLUGIN_VERSION_MINOR 1
-#define PLUGIN_VERSION_REVISION 0
+#define PLUGIN_VERSION_MAJOR 1
+#define PLUGIN_VERSION_MINOR 3
+#define PLUGIN_VERSION_REVISION 1
 #define PLUGIN_VERSION_BUILD 0
 
 // The stage of your plugin, which can be PLUGIN_VERSION_DEV, PLUGIN_VERSION_BETA
 // and PLUGIN_VERSION_RELEASE
-#define PLUGIN_VERSION_STATUS PLUGIN_VERSION_DEV
+#define PLUGIN_VERSION_STATUS PLUGIN_VERSION_RELEASE
 
 // The target protocol version of your plugin. If you do not know how to set it,
 // please start the latest version of LiteLoaderBDS and get the protocol version.
 // If you are confident about the version compatibility of your plugin, you can
 // just comment this line (NOT RECOMMENDED).
-#define TARGET_BDS_PROTOCOL_VERSION 545
+#define TARGET_BDS_PROTOCOL_VERSION 557
 
 // ***************************************************************************************
 
@@ -71,7 +70,7 @@ static_assert(false, "Please modify your plugin information below and delete thi
 
 #define FILE_VERSION_BLOCK_HEADER 0x04004B0L
 #define FILE_VERSION_COMPANY_NAME PLUGIN_AUTHOR
-#define FILE_VERSION_LEGAL_COPYRIGHT "Copyright (C) 2022"
+#define FILE_VERSION_LEGAL_COPYRIGHT "Copyright Development Studio(C) 2022"
 #define FILE_VERSION_FILE_DESCRIPTION PLUGIN_INTRODUCTION
 #define FILE_VERSION_FILE_VERSION_STRING PLUGIN_FILE_VERSION_STRING
 #define FILE_VERSION_INTERNAL_NAME PLUGIN_NAME

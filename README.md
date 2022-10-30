@@ -1,29 +1,27 @@
-# LiteLoaderBDS C++ Plugin Template
+# EbanCpp
+##### EbanCpp is rewrite <a href = "https://github.com/Development-studio/Eban" >orginal</a> Eban from js (lxl and llse) to Cpp (native LL plugin)
+## How to install?
+- Download Eban plugin from <a href = "https://github.com/mikhaillav/EbanCpp/releases/">Relases</a>
+- Put it into your plugin dir (LiteLoaderDir/plugins)
+- Start server
 
-The template repository for LiteLoaderBDS C++ plugin development.
-
-## Usage
-
-* Write and build your plugin
-
-  Please refer to [LiteLoaderBDS C++ Plugin Development Documentation](https://cpp.docs.litebds.com/en/) or [LiteLoaderBDS C++ 插件开发文档](https://cpp.docs.litebds.com/zh-Hans/).
-
-* Edit README.md and LICENSE
-
-  You ought not to keep the original README.md, for it contains instructions on how to build your own plugin, which might not fit your plugin repository. The README.md of your repository should contain instructions on how to build, install and use your plugin.
-
-  You don't necessarily want your repository to be open sourced under the Unlicense, so please choose your own license in place of the `LICENSE` file.
-
-## For Beta Developers
-
-If you would like to experience the latest features for plugins in beta versions of LiteLoaderBDS, you can switch the branch of the SDK to beta. Run the commands below under the plugin repository:
-
-```sh
-git submodule set-branch --branch beta SDK
-git submodule update --init --remote
-```
-
-## License
-
-This repository is open source under the Unlicense.
-Please refer to [the license file](LICENSE) for further information.
+## Commands
+### ban 
+##### Used to ban player that online (collect info about player like UUID, ClinetID, etc)
+##### Syntax: ban〈player〉[reason]
+- player: nick name of player to ban (select online player via selectors) 
+- reason: reason of ban, will show then banned player join server. if doesn't say will be "Banned by admin" [optional]
+-----
+### offban 
+##### Used to ban player that offline (collect info about player like UUID, ClinetID, etc)
+##### Syntax: offban〈player〉[reason]
+- player: nick name of player to ban  
+- reason: reason of ban, will show then banned player join server. if doesn't say will be "Banned by admin" [optional]
+-----
+### unban 
+##### Used to unban player
+##### Syntax: ban〈player〉
+- player: nick name of player to unban
+-----
+# Thanks!
+## Thanks for using Eban, I appreciate your feedback and bug reports!
