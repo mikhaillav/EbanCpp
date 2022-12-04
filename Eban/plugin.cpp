@@ -27,6 +27,7 @@ inline bool IsFile(const std::string& name) {
 auto j2 = R"(
                 {
                     "kickmsg": "You have been banned\nReason: <reason>\n:(",
+                    "banlist.path": "./",
                     "cmdmsg": "Banned player <player> try to join server.",
                     "checkBanlist.succses": "Banlist found, all okay!",
                     "checkBanlist.error": "Banlist not found, creating one...",
@@ -37,7 +38,7 @@ auto j2 = R"(
                     "banned.error.op": "Unable to Ban operator.",
                     "banned.error.already": "Player is already banned.",
                     "unbanned.succses": "Player has been unbanned.",
-                    "ban.ip": "false",
+                    "ban.ip": "true",
                     "ban.clientid": "true",
                     "ban.UUID": "true",
                     "ban.XUID": "true",
@@ -45,22 +46,6 @@ auto j2 = R"(
                     "unbanned.error.isnt": "Player isn't banned."
                 }
             )"_json;
-
-void checkfiles() {
-    if (!IsFile("EbanConfig.json")) {
-        logger.warn("Config not found, creating one...");
-        std::ofstream file("EbanConfig.json");
-
-        file << std::setw(4) << j2 << std::endl;
-        logger.warn("Created!");
-    }
-    if (!IsFile("banlist.json")) {
-        logger.warn("Banlist not found, creating one...");
-        std::ofstream file("banlist.json");
-        file << "[]";
-        logger.warn("Created!");
-    }
-}
 
 
 
@@ -71,6 +56,24 @@ string checkcfg(const string item) {
     string cpp_string = parsed[item].get<std::string>();
     return cpp_string;
 }
+
+void checkfiles() {
+    if (!IsFile("EbanConfig.json")) {
+        logger.warn("Config not found, creating one...");
+        std::ofstream file("EbanConfig.json");
+
+        file << std::setw(4) << j2 << std::endl;
+        logger.warn("Created!");
+    }
+    if (!IsFile(checkcfg("banlist.path") + "banlist.json")) {
+        logger.warn("Banlist not found, creating one...");
+        std::ofstream file(checkcfg("banlist.path") + "banlist.json");
+        file << "[]";
+        logger.warn("Created!");
+    }
+}
+
+
 
 //Ban command code
 
@@ -100,10 +103,10 @@ public:
 
                     i->kick(msg); //kick target
 
-                    std::ifstream banlist("banlist.json"); //open banlist 
+                    std::ifstream banlist(checkcfg("banlist.path") + "banlist.json"); //open banlist 
                     json parsed;
                     banlist >> parsed; //parsed banlist
-                    std::ofstream nw("banlist.json"); //open banlist to write
+                    std::ofstream nw(checkcfg("banlist.path") + "banlist.json"); //open banlist to write
 
                     string nick = i->getRealName();
                     std::transform(nick.begin(), nick.end(), nick.begin(),
@@ -167,7 +170,7 @@ public:
 
         //open and parse banlist
 
-        std::ifstream banlist("banlist.json");
+        std::ifstream banlist(checkcfg("banlist.path") + "banlist.json");
         json parsed;
         banlist >> parsed;
 
@@ -183,7 +186,7 @@ public:
         }
         //else - ban him
         if (notbanned) {
-            std::ofstream nw("banlist.json");
+            std::ofstream nw(checkcfg("banlist.path") + "banlist.json");
 
             json form = { {"Nick",p}, {"UUID", "404 not found"}, {"ClientID", "404 not found"}, {"XUID", "404 not found"}, {"Ip", "404 not found"}, {"Reason", reasn} };
             parsed.push_back(form);
@@ -228,7 +231,7 @@ public:
 
         //open and parse banlist
 
-        std::ifstream banlist("banlist.json");
+        std::ifstream banlist(checkcfg("banlist.path") + "banlist.json");
         json parsed;
         banlist >> parsed;
 
@@ -237,7 +240,7 @@ public:
         bool banned = false;
         for (int i = 0; i < parsed.size(); i++) {
             if (parsed[i]["Nick"] == p) {
-                std::ofstream nw("banlist.json");
+                std::ofstream nw(checkcfg("banlist.path") + "banlist.json");
                 parsed.erase(i);
                 nw << std::setw(4) << parsed << std::endl;
                 outp.success(checkcfg("unbanned.succses"));
@@ -277,7 +280,7 @@ void JoinEvent() {
 
         //open and parse banlist
 
-        std::ifstream banlist("banlist.json");
+        std::ifstream banlist(checkcfg("banlist.path") + "banlist.json");
         json parsed;
         banlist >> parsed;
 
